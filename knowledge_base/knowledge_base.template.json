@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "name": "个人因子挖掘白名单知识库",
+    "version": "0.1.0",
+    "created": "2026-08-14",
+    "owner": "buddy主人",
+    "description": "阶段一(约束内生成)的输入料库。所有 LLM 生成与 MCTS 搜索只在本知识库范围内进行，越权即拦截。",
+    "update_rule": "每次因子入库/淘汰、研报/论文新增、失败复盘归档，都必须回写本文件或对应子目录。"
+  },
+
+  "field_dictionary": [
+    {"field": "open",            "table": "price",     "desc": "开盘价",           "whitelisted": true},
+    {"field": "close",           "table": "price",     "desc": "收盘价",           "whitelisted": true},
+    {"field": "high",            "table": "price",     "desc": "最高价",           "whitelisted": true},
+    {"field": "low",             "table": "price",     "desc": "最低价",           "whitelisted": true},
+    {"field": "volume",          "table": "price",     "desc": "成交量(股)",       "whitelisted": true},
+    {"field": "money",           "table": "price",     "desc": "成交额(元)",       "whitelisted": true},
+    {"field": "vwap",            "table": "price",     "desc": "成交量加权均价",   "whitelisted": true},
+    {"field": "pre_close",       "table": "price",     "desc": "昨收价",           "whitelisted": true},
+    {"field": "turnover_ratio",  "table": "valuation", "desc": "换手率(%)",        "whitelisted": true},
+    {"field": "pe_ratio",        "table": "valuation", "desc": "市盈率",           "whitelisted": true},
+    {"field": "pb_ratio",        "table": "valuation", "desc": "市净率",           "whitelisted": true},
+    {"field": "market_cap",      "table": "valuation", "desc": "总市值",           "whitelisted": true},
+    {"field": "circulating_market_cap", "table": "valuation", "desc": "流通市值", "whitelisted": true},
+    {"field": "roe",             "table": "indicator", "desc": "净资产收益率",     "whitelisted": true},
+    {"field": "inc_revenue",     "table": "indicator", "desc": "营业收入同比(%)",  "whitelisted": true},
+    {"field": "inc_net_profit",  "table": "indicator", "desc": "净利润同比(%)",    "whitelisted": true},
+    {"field": "net_profit_margin", "table": "indicator", "desc": "销售净利率",     "whitelisted": true}
+  ],
+
+  "operator_whitelist": [
+    "Add","Sub","Mul","Div","Neg","Abs","Log","Pow","Sqrt","Sign",
+    "Max","Min","Rank","Scale","Delta","Ref","Correlation","Covariance",
+    "MA","STD","EMA","WMA","DecayLinear","TsRank","TsArgMax","TsArgMin","Med",
+    "Sum","Product","Delay","MA(close,5)-MA(close,20)","Per"
+  ],
+
+  "effective_factor_library": [
+    {
+      "id": "F0001",
+      "name": "DemoTrendFactor",
+      "expr": "MA(close,5) - MA(close,20)",
+      "ic": 0.032,
+      "rankic": 0.030,
+      "ir": 0.78,
+      "turnover": 0.12,
+      "logic": "短期均线高于长期均线，捕捉价格动量/趋势反转。",
+      "status": "active",
+      "in_date": "2026-08-14"
+    }
+  ],
+
+  "research_reports": [
+    {"id": "R0001", "title": "示例：均线类因子的市值中性化处理", "file": "研报库/R0001_均线中性化.md", "key_takeaway": "原始价量因子需市值/行业中性化后再评估，否则收益多来自风格暴露。"}
+  ],
+
+  "paper_library": [
+    {"id": "P0001", "title": "Navigating the Alpha Jungle: LLM-MCTS Formulaic Alpha Mining", "source": "AAAI 2026 / arXiv 2505.11122", "file": "论文库/P0001_alpha_jungle.md", "key_takeaway": "用LLM+MCTS做公式搜索，五维评估反馈引导生成；FSA频繁子树规避防同质化。"}
+  ],
+
+  "failed_experiments": [
+    {
+      "id": "X0001",
+      "attempt": "直接使用 LLM 自由生成因子不经白名单校验",
+      "result": "编译失败/引用不存在字段(hallucination)",
+      "lesson": "必须先锁定字段与算子白名单，LLM 只允许在白名单内组合。",
+      "date": "2026-08-14"
+    }
+  ],
+
+  "frequent_subtrees_fsa": [
+    {"root_gene": "MA(vwap,t)",      "support": 0.0, "action": "avoid_top3_if_overused"},
+    {"root_gene": "STD(high-low,t)", "support": 0.0, "action": "avoid_top3_if_overused"}
+  ]
+}
